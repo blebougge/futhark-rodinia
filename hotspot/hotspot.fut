@@ -5,14 +5,14 @@
 //
 // --
 //
-// compiled input @ 64.in
-// output @ 64.out
+// compiled input @ data/64.in
+// output @ data/64.out
 //
-// compiled input @ 512.in
-// output @ 512.out
+// compiled input @ data/512.in
+// output @ data/512.out
 //
-// compiled input @ 1024.in
-// output @ 1024.out
+// compiled input @ data/1024.in
+// output @ data/1024.out
 
 fun int str_size() = 256
 
