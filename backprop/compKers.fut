@@ -142,13 +142,7 @@ fun { [real,n_in]
     , [[real,n_hidden], n_in]
     , [[real,n_out],n_hidden]
     }
-bpnn_create(int n_in, int n_hidden, int n_out, int offset, [int] dirVct) = 
-//  let hidden_units  =  in // [n_hidden]
-//  let output_units  =  in // [n_out]
-//
-//  let hidden_delta  =  in // [n_hidden]
-//  let output_delta  =  in // [n_out]
- 
+bpnn_create(int n_in, int n_hidden, int n_out, int offset, [int] dirVct) =  
   // [n_out]
   let target = bpnn_constant_row(n_out, 0.1) in
   
@@ -191,11 +185,11 @@ main(int layer_size, [int,num_bits] dirVct) =
     let {   input_units, target, input_weights, hidden_weights, 
             input_prev_weights, hidden_prev_weights} = 
         bpnn_create(layer_szp1, 16+1, 1+1, 1, dirVct) in
-    
+
     let {   out_err, hid_err, input_weights, hidden_weights, 
             input_prev_weights, hidden_prev_weights  } = 
         bpnn_train_kernel(  input_units, target, input_weights, hidden_weights, 
                             input_prev_weights, hidden_prev_weights)
     in {out_err, hid_err, input_weights, hidden_weights}
-    
+      
 
