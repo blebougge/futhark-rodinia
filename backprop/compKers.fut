@@ -1,15 +1,7 @@
+// Rodinia's Back-Propagation benchmark translated to Futhark.
 // --
-// input {
-//   { 128
-//   , [ 536870912, 268435456, 134217728, 67108864, 33554432, 16777216, 8388608, 4194304, 2097152, 1048576, 
-//       524288,    262144,    131072,    65536,    32768,    16384,    8192,    4096,    2048,    1024, 
-//       512,       256,       128,       64,       32,       16,       8,       4,       2,       1      ]
-//   }
-// }
-// output {
-//   {0.000158, 0.0}
-//
-// }
+// compiled input @ backprop-data/small.in
+// output @ backprop-data/small.out
 
 fun real ETA()       = 0.3
 fun real MOMENTUM()  = 0.3
@@ -136,8 +128,10 @@ fun [real,m] bpnn_randomize_row(int m, int offset, [int] dirVct) =
 fun [real,m] bpnn_constant_row(int m, real val) = 
     replicate(m, val)
 
-fun [[real,n],m] bpnn_zero_weights(int m, int n) = 
-    reshape((m,n), replicate(m*n, 0.0))
+fun [[real,n],m] bpnn_zero_weights(int m, int n) =
+    map (fn [real] (int i) => replicate(n, 0.0)
+        , iota(m) )
+    //reshape((m,n), replicate(m*n, 0.0))
 
 /////////////////////////////////////////////////////
 
@@ -184,7 +178,7 @@ bpnn_create(int n_in, int n_hidden, int n_out, int offset, [int] dirVct) =
     input_prev_weights, hidden_prev_weights }
 
 
-fun { real, real }
+fun { real, real, [[real]], [[real]] }
     // { real, real, [[real]], [[real]], [[real]], [[real]] }
     ////n_in = layer_size+1, n_hidden = 17, nout = 2
     //{ real, real
@@ -192,7 +186,7 @@ fun { real, real }
     //, [[real,n_out],n_hidden]
     //, [[real,n_hidden], n_in]
     //, [[real,n_out],n_hidden] }
-main(int layer_size, [int] dirVct) = 
+main(int layer_size, [int,num_bits] dirVct) = 
     let layer_szp1 = layer_size+1 in
     let {   input_units, target, input_weights, hidden_weights, 
             input_prev_weights, hidden_prev_weights} = 
@@ -202,6 +196,6 @@ main(int layer_size, [int] dirVct) =
             input_prev_weights, hidden_prev_weights  } = 
         bpnn_train_kernel(  input_units, target, input_weights, hidden_weights, 
                             input_prev_weights, hidden_prev_weights)
-    in {out_err, hid_err}
+    in {out_err, hid_err, input_weights, hidden_weights}
     
 
