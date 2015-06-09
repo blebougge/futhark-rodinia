@@ -29,17 +29,28 @@ fun [real,nfeatures] add_centroids([real,nfeatures] x, [real,nfeatures] y) =
   zipWith(+, x, y)
 
 fun [[real,nfeatures],nclusters]
-  centroidsOf(int nclusters, [[real,nfeatures],npoints] feature, [int,npoints] membership) =
-  map(fn [real,nfeatures] (int this_cluster) =>
-        let this_cluster_features =
-          map (fn [real,nfeatures] (int i, int feature_cluster) =>
-                 feature[i],
-               filter(fn bool (int i, int feature_cluster) =>
-                        feature_cluster == this_cluster,
-                      zip(iota(npoints), membership))) in
-        map(/toFloat(size(0,this_cluster_features)),
-            reduce(add_centroids, replicate(nfeatures, 0.0), this_cluster_features)),
-      iota(nclusters))
+  centroids_of(int nclusters, [[real,nfeatures],npoints] feature, [int,npoints] membership) =
+  let blank = replicate(nclusters, {copy(replicate(nfeatures, 0.0)), 0}) in
+  let incrs =
+    zipWith(fn [{[real,nfeatures],int},nclusters] ([real,nfeatures] feature, int cluster) =>
+              let a = copy(blank) in
+              let a[cluster] = {feature,1} in
+              a,
+            feature, membership) in
+  let {cluster_sums, features_in_clusters} =
+    unzip(reduce(fn [{[real,nfeatures],int},nclusters] ([{[real,nfeatures],int},nclusters] acc,
+                                                        [{[real,nfeatures],int},nclusters] x) =>
+                   zipWith(fn {[real,nfeatures],int} ({[real,nfeatures],int} x,
+                                                      {[real,nfeatures],int} y) =>
+                             let {x_a, x_b} = x in
+                             let {y_a, y_b} = y in
+                             {add_centroids(x_a, y_a), x_b + y_b},
+                           acc, x),
+                 blank, incrs)) in
+  zipWith(fn [real,nfeatures] ([real,nfeatures] cluster_sum,
+                               int features_in_cluster) =>
+            map(/toFloat(features_in_cluster), cluster_sum),
+          cluster_sums, features_in_clusters)
 
 fun {[[real]], [int], int}
   main(int threshold,
@@ -58,7 +69,7 @@ fun {[[real]], [int], int}
     // For each point, find the cluster with the closest centroid.
     let new_membership = map(find_nearest_point(cluster_centres), feature) in
     // Then, find the new centres of the clusters.
-    let new_centres = centroidsOf(nclusters, feature, new_membership) in
+    let new_centres = centroids_of(nclusters, feature, new_membership) in
     let delta = reduce(+, 0, map(fn int (bool b) =>
                                    if b then 0 else 1,
                                  zipWith(==, membership, new_membership))) in
