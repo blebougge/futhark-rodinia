@@ -17,11 +17,10 @@ fun real ABS   (real x) = if x < 0.0 then 0.0 - x else x
 fun {real, [real,n]}
 bpnn_output_error([real,n] target, [real,n] output) = 
     let {errs, delta} = unzip (
-        map ( fn {real,real} (real t, real o, int j) =>
-                if(j == 0) then {0.0, 0.0}
-                else let d = o * (1.0 - o) * (t - o) in
-                     { if d < 0.0 then 0.0-d else d, d }
-            , zip(target,output,iota(n)) ) ) in
+        map ( fn {real,real} (real t, real o) =>
+                let d = o * (1.0 - o) * (t - o) in
+                { if d < 0.0 then 0.0-d else d, d }
+            , zip(target,output) ) ) in
     let err = reduce(+, 0.0, errs)
     in  { err, delta }
 
@@ -29,13 +28,12 @@ bpnn_output_error([real,n] target, [real,n] output) =
 fun {real, [real,nh]}
 bpnn_hidden_error([real,no] delta_o, [[real,no],nh] who, [real,nh] hidden) =
     let {errs, delta_h} = unzip (
-        map ( fn {real,real} (real hidden_el, [real] who_row, int j) =>
-                //if (j == 0) then {0.0, 0.0}
+        map ( fn {real,real} (real hidden_el, [real] who_row) =>
                 let prods  = zipWith( *, delta_o, who_row )       in
                 let sumrow = reduce ( +, 0.0, prods )             in
                 let new_el = hidden_el * (1.0-hidden_el) * sumrow in
-                if j==0 then {0.0, 0.0} else { ABS(new_el), new_el }
-            , zip( hidden, who, iota(nh) )
+                { ABS(new_el), new_el }
+            , zip( hidden, who )
         ) ) in
     let err = reduce( +, 0.0, errs)
     in  { err, delta_h }
