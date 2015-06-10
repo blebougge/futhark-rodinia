@@ -127,9 +127,10 @@ fun [real,m] bpnn_constant_row(int m, real val) =
     replicate(m, val)
 
 fun [[real,n],m] bpnn_zero_weights(int m, int n) =
-    map (fn [real] (int i) => replicate(n, 0.0)
-        , iota(m) )
-    //reshape((m,n), replicate(m*n, 0.0))
+    //map (fn [real] (int i) => replicate(n, 0.0)
+    //    , iota(m) )
+    // OR this one which shows a BUG:
+    reshape((m,n), replicate(m*n, 0.0))
 
 /////////////////////////////////////////////////////
 
