@@ -84,8 +84,8 @@ fun [[real]] single_iteration([[real,col],row] temp, [[real,col],row] power,
 -- differential equations to difference equations and solves the
 -- difference equations by iterating
 fun [[real]] compute_tran_temp(int num_iterations, [[real,col],row] temp, [[real,col],row] power) =
-  let grid_height = chip_height() * toFloat(row) in
-  let grid_width = chip_width() * toFloat(col) in
+  let grid_height = chip_height() / toFloat(row) in
+  let grid_width = chip_width() / toFloat(col) in
   let Cap = factor_chip() * spec_heat_si() * t_chip() * grid_width * grid_height in
   let Rx = grid_width / (2.0 * k_si() * t_chip() * grid_height) in
   let Ry = grid_height / (2.0 * k_si() * t_chip() * grid_width) in
