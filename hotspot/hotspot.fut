@@ -3,7 +3,7 @@
 --
 -- Compile with double-precision reals or you may get wrong results.
 --
--- --
+-- ==
 --
 -- compiled input @ data/64.in
 -- output @ data/64.out
