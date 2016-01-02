@@ -1,10 +1,10 @@
-// Threshold
+-- Threshold
 0
-// Number of clusters
+-- Number of clusters
 3
-// Max iterations
+-- Max iterations
 500
-// Points
+-- Points
 [
  [ 0.0, 0.0 ],
  [ 5.0, 5.0 ],

@@ -1,17 +1,17 @@
-// multi-dimensional spatial Euclid distance square
-//
-// Much inspiration has been gained from the kmeans-vector package on
-// Hackage.
-//
-// --
-//
-// compiled input @ data/trivial.in
-// output @ data/trivial.out
-// compiled input @ data/100.in
-// output @ data/100.out
+-- multi-dimensional spatial Euclid distance square
+--
+-- Much inspiration has been gained from the kmeans-vector package on
+-- Hackage.
+--
+-- ==
+--
+-- compiled input @ data/trivial.in
+-- output @ data/trivial.out
+-- compiled input @ data/100.in
+-- output @ data/100.out
 
 fun real euclid_dist_2([real,numdims] pt1, [real,numdims] pt2) =
-  reduce(+, 0.0, map(pow 2.0, zipWith(-, pt1, pt2)))
+  reduce(+, 0.0, map(**2.0, zipWith(-, pt1, pt2)))
 
 fun {int,real} closest_point({int,real} p1, {int,real} p2) =
   let {_,d1} = p1 in
@@ -28,7 +28,7 @@ fun int find_nearest_point([[real,nfeatures],npoints] pts, [real,nfeatures] pt) 
 fun [real,nfeatures] add_centroids([real,nfeatures] x, [real,nfeatures] y) =
   zipWith(+, x, y)
 
-fun [[real,nfeatures],nclusters]
+fun *[[real,nfeatures],nclusters]
   centroids_of(int nclusters, [[real,nfeatures],npoints] feature, [int,npoints] membership) =
   let count_incrs =
     zipWith(fn [int,nclusters] ([real,nfeatures] feature, int cluster) =>
@@ -42,20 +42,20 @@ fun [[real,nfeatures],nclusters]
               let a[cluster] = feature in
               a,
             feature, membership) in
-  let features_in_clusters =
-    reduce(fn [int,nclusters] ([int,nclusters] acc,
-                               [int,nclusters] x) =>
-             zipWith(+, acc, x),
-           replicate(nclusters,0), count_incrs) in
+   let features_in_clusters =
+     reduce(fn [int,nclusters] ([int,nclusters] acc,
+                                [int,nclusters] x) =>
+              zipWith(+, acc, x),
+            replicate(nclusters,0), count_incrs) in
   let cluster_sums =
-    reduce(fn [[real,nfeatures],nclusters] ([[real,nfeatures],nclusters] acc,
-                                            [[real,nfeatures],nclusters] elem) =>
+    reduce(fn *[[real,nfeatures],nclusters] (*[[real,nfeatures],nclusters] acc,
+                                             *[[real,nfeatures],nclusters] elem) =>
              zipWith(fn [real,nfeatures] (int features_in_cluster,
                                           [real,nfeatures] x,
                                           [real,nfeatures] y) =>
                        add_centroids(x, map(/toFloat(features_in_cluster), y)),
                      features_in_clusters, acc, elem),
-           replicate(nclusters,replicate(nfeatures,0.0)), sum_incrs) in
+           copy(replicate(nclusters,replicate(nfeatures,0.0))), sum_incrs) in
   cluster_sums
 
 fun {[[real]], [int], int}
@@ -63,18 +63,18 @@ fun {[[real]], [int], int}
        int nclusters,
        int max_iterations,
        [[real,nfeatures],npoints] feature) =
-  // Assign arbitrary initial cluster centres.
+  -- Assign arbitrary initial cluster centres.
   let cluster_centres = map(fn [real] (int i) =>
                               feature[i],
                             iota(nclusters)) in
-  // Also assign points arbitrarily to clusters.
+  -- Also assign points arbitrarily to clusters.
   let membership = map(% nclusters, iota(npoints)) in
   let delta = threshold + 1 in
   let i = 0 in
   loop ({membership, cluster_centres, delta, i}) = while delta > threshold && i < max_iterations do
-    // For each point, find the cluster with the closest centroid.
+    -- For each point, find the cluster with the closest centroid.
     let new_membership = map(find_nearest_point(cluster_centres), feature) in
-    // Then, find the new centres of the clusters.
+    -- Then, find the new centres of the clusters.
     let new_centres = centroids_of(nclusters, feature, new_membership) in
     let delta = reduce(+, 0, map(fn int (bool b) =>
                                    if b then 0 else 1,
