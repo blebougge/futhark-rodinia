@@ -6,6 +6,10 @@
 --
 -- One annoying difference is that the original program assumes
 -- column-major storage, whereas we use row-major storage here.
+--
+-- ==
+-- compiled input @ data/image.in
+-- output @ data/image.out
 
 fun [[int,cols],rows] main([[int,cols],rows] image) =
   let niter = 100 in
@@ -52,14 +56,10 @@ fun [[int,cols],rows] main([[int,cols],rows] image) =
     -- gets standard deviation of ROI
     let q0sqr = varROI / (meanROI*meanROI) in
 
-    -- Futhark makes it a little awkward to express a two-dimensional
-    -- map that produces an array of tuples that we want to unzip.
-    -- The resulting code is fine, though.
     let {dN, dS, dW, dE, c} =
       unzip(
-        zipWith(fn {[real,cols],[real,cols],[real,cols],[real,cols],[real,cols]}
+        zipWith(fn [{real,real,real,real,real},cols]
                   (int i, [real] row) =>
-                  unzip(
                     zipWith(fn {real,real,real,real,real} (int j, real Jc) =>
                               let dN_k = image[iN[i],j] - Jc in
                               let dS_k = image[iS[i],j] - Jc in
@@ -78,7 +78,7 @@ fun [[int,cols],rows] main([[int,cols],rows] image) =
                                         else if c_k > 1.0
                                              then 1.0 else c_k in
                               {dN_k, dS_k, dW_k, dE_k, c_k}
-                           , iota(cols), row))
+                           , iota(cols), row)
                , iota(rows), image)) in
 
     let image =
