@@ -40,7 +40,7 @@ def fut(input):
 
 
 def main():
-  if len(sys.argv) != 2:
+  if len(sys.argv) != 3:
     exit('Usage: %s <infile> <outfile>' % sys.argv[0])
 
   context = cl.create_some_context(interactive=False)
