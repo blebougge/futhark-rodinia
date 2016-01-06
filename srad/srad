@@ -41,18 +41,19 @@ def fut(input):
 
 def main():
   if len(sys.argv) != 2:
-    exit('Usage: %s <file>' % sys.argv[0])
+    exit('Usage: %s <infile> <outfile>' % sys.argv[0])
 
   context = cl.create_some_context(interactive=False)
   queue = cl.CommandQueue(context)
   srad_core.setup_opencl(context, queue)
 
-  name = sys.argv[1]
+  inname = sys.argv[1]
+  outname = sys.argv[2]
   with open(name, 'r') as f:
     data = f.read()
     image = pgm2fut(data)
 
-    fut2pgm(srad_core.main(pgm2fut(data)))
+    fut2pgm(srad_core.main(pgm2fut(data)), outname)
 
   #image will always be stored as futhark format.
   image = 0
